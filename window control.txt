@@ -1,0 +1,179 @@
+var wind = 0;
+var smoke = 0;
+var temp = 0;
+function setup(){
+	pinMode(1, INPUT);
+	pinMode(0, OUTPUT);
+	pinMode(5, OUTPUT);
+	pinMode(A1, INPUT);
+	pinMode(A0, INPUT);
+	
+}
+function loop (){
+	
+//	value = analogRead(1);
+	temp = analogRead(A0);
+	console.log("temp:                               "+ temp);
+	smoke = analogRead(A1);
+	console.log("smoke:          " + smoke);
+	wind = digitalRead(1);
+	delay(500);
+	console.log("wind: "+wind);
+	digitalWrite(5, wind);
+	if(wind == 1023 && smoke === 0){
+		customWrite(0, 0);
+	}
+	else{
+		customWrite(0, 1);
+	}
+	if(temp > 500)
+	{
+		customWrite(2, 1);
+	}
+	else
+	{
+		customWrite(2, 2);
+	}
+}
+
+
+
+
+//fire detect code
+var fire = 0;
+var count = 0;
+function setup(){
+	pinMode(1, INPUT);
+	pinMode(2, OUTPUT);
+	pinMode(3, OUTPUT);
+}
+while(count <= 1000000){
+	fire = digitalRead(1);
+	console.log(fire);
+	if(fire == 1023)
+	{
+		digitalWrite(2, HIGH);   //must be high no 1 otherwise won't work
+		customWrite(3, 1);
+	}else
+	{
+		delay(1000);
+		if(count>25)
+		{
+			digitalWrite(2, LOW);
+			customWrite(3, 0);
+		}
+		count++;
+	}
+}
+
+
+//motion sense final
+
+var count = 0;
+function setup(){
+	
+	pinMode(0, INPUT);
+	pinMode(1, OUTPUT);
+	pinMode(2, OUTPUT);
+	pinMode(3, OUTPUT);
+	pinMode(4, OUTPUT);
+	pinMode(5, OUTPUT);
+
+}
+while(count <= 10000000)
+{
+	if(digitalRead(0) == HIGH)
+	{
+		customWrite(1, 2);
+		customWrite(2, 1);
+		customWrite(3, 1);
+		customWrite(4, 2);
+		customWrite(5, 2);
+		count = 0;
+		
+		
+	}else
+	
+	{
+		delay(1000);
+		count++;
+		if(count >25)
+		{
+			customWrite(1, 0);
+		}
+		count++;
+		if(count >50)
+		{
+			customWrite(4, 1);
+		}
+		customWrite(2, 0);
+		customWrite(3, 0);
+		
+	}
+	
+}
+
+
+//sound detect
+var volt = 0;
+var sound = 0;
+function setup(){
+	pinMode(0, INPUT);
+	pinMode(1, INPUT);
+	pinMode(2, OUTPUT);
+	IoEClient.setup({
+		type: "Home Environment",
+		states: [
+			{
+				name: "volt",
+				type: "number",
+				decimalDigits: 1
+			},
+			{
+				name: "sound",
+				type: "number",
+				decimalDigits: 1
+			}
+			]
+	});
+
+
+
+}
+
+function loop(){
+	
+	volt = analogRead(0);
+	analogWrite(2,volt);
+	sound = analogRead(2);
+	IoEClient.reportStates([volt, sound]);
+	console.log(volt);
+	delay(1000);
+	console.log(sound);
+	
+}
+
+
+IoEClient.setup({
+		type: "Home Environment",
+		states: [
+			{
+				name: "wind",
+				type: "number",
+				decimalDigits: 1
+			},
+			{
+				name: "smoke",
+				type: "number",
+				decimalDigits: 1
+			},
+			{
+				name: "temp",
+				type: "number",
+				decimalDigits: 1
+			}
+			]
+	});
+
+
+IoEClient.reportStates([wind, smoke, temp]);
